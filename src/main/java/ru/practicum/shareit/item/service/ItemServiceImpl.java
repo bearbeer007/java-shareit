@@ -39,7 +39,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto update(long id, ItemDto item, long ownerId) {
-
         // Обновление
         final Optional<Item> itemOpt = itemRepository.getByIdAndOwnerId(id, ownerId);
         final Item itemFromRepo = itemOpt.orElseThrow(() -> new ItemNotFoundException(id));

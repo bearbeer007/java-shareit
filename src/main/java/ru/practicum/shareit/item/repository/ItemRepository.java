@@ -20,5 +20,4 @@ public interface ItemRepository {
 
     boolean contains(long id);
 
-    boolean checkUserOwnItem(long userId, long itemId);
 }

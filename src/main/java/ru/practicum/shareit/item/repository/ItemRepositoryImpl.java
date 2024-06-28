@@ -90,8 +90,4 @@ public class ItemRepositoryImpl implements ItemRepository {
         return allItems.containsKey(id);
     }
 
-    @Override
-    public boolean checkUserOwnItem(long userId, long itemId) {
-        return itemsByOwner.containsKey(userId) && itemsByOwner.get(userId).containsKey(itemId);
-    }
 }
