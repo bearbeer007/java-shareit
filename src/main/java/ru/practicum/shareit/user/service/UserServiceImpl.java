@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
             final String oldEmail = user.getEmail();
             final String newEmail = changedUser.getEmail();
 
-            if (!oldEmail.equals(newEmail) && checkNotBlankEmail(newEmail)) {
+            if (!oldEmail.equals(newEmail)) {
                 checkExistsUserEmail(newEmail);
             }
 
@@ -80,9 +80,6 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(id);
     }
 
-    private boolean checkNotBlankEmail(final String email) {
-        return nonNull(email) && !email.isBlank();
-    }
 
     private void checkExistsUserEmail(final String email) {
         if (userRepository.containsByEmail(email)) {

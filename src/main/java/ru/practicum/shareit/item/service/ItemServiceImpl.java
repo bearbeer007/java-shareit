@@ -6,7 +6,6 @@ import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
-import ru.practicum.shareit.item.exception.NotOwnerAccessException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
@@ -46,9 +45,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto update(long id, ItemDto item, long ownerId) {
-        checkItemExists(id);
-        checkUserExists(ownerId);
-        checkUserOwnItem(ownerId, id);
 
         // Обновление
         final Optional<Item> itemOpt = itemRepository.getByIdAndOwnerId(id, ownerId);
@@ -76,8 +72,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getOwnerItemById(long itemId, long ownerId) {
-        checkItemExists(itemId);
-        checkUserExists(ownerId);
+
 
         final Optional<Item> itemOpt = itemRepository.getByIdAndOwnerId(itemId, ownerId);
         final Item item = itemOpt.orElseThrow(() -> new ItemNotFoundException(itemId));
@@ -87,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getAllOwnerItems(long ownerId) {
-        checkUserExists(ownerId);
+
 
         final List<Item> ownerItems = itemRepository.getOwnerItems(ownerId);
         return ownerItems.stream().map(ItemMapper::toItemDto).collect(toUnmodifiableList());
@@ -105,21 +100,4 @@ public class ItemServiceImpl implements ItemService {
         return searchResult.stream().map(ItemMapper::toItemDto).collect(toUnmodifiableList());
     }
 
-    private void checkUserOwnItem(long userId, long itemId) {
-        if (!itemRepository.checkUserOwnItem(userId, itemId)) {
-            throw new NotOwnerAccessException(String.format("Вещь с id = %s не принадлежит пользователю с id = %s", itemId, userId));
-        }
-    }
-
-    private void checkUserExists(long userId) {
-        if (!userRepository.containsById(userId)) {
-            throw new UserNotFoundException(userId);
-        }
-    }
-
-    private void checkItemExists(long itemId) {
-        if (!itemRepository.contains(itemId)) {
-            throw new ItemNotFoundException(itemId);
-        }
-    }
 }
