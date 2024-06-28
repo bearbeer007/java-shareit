@@ -26,15 +26,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Long create(ItemCreateDto item, long ownerId) {
-        final Optional<User> ownerOpt = userRepository.findById(ownerId);
-
-        if (ownerOpt.isEmpty()) {
-            throw new UserNotFoundException(ownerId);
-        }
-
-        final User owner = ownerOpt.get();
-        final Item itemEntity = ItemMapper.toItem(item, owner);
-        return itemRepository.add(itemEntity, owner.getId());
+        User user = userRepository.findById(ownerId).orElseThrow(() -> new UserNotFoundException(ownerId));
+        final Item itemEntity = ItemMapper.toItem(item, user);
+        return itemRepository.add(itemEntity, user.getId());
     }
 
     @Override
