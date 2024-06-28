@@ -33,13 +33,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto createAndGet(ItemCreateDto item, long ownerId) {
-        final Long itemId = create(item, ownerId);
-        return getOwnerItemById(itemId, ownerId);
+        User user = userRepository.findById(ownerId).orElseThrow(() -> new UserNotFoundException(ownerId));
+        final Item itemEntity = ItemMapper.toItem(item, user);
+        final Long itemId = itemRepository.add(itemEntity, user.getId());
+        return ItemMapper.toItemDto(itemEntity);
     }
 
     @Override
     public ItemDto update(long id, ItemDto item, long ownerId) {
-        // Обновление
         final Optional<Item> itemOpt = itemRepository.getByIdAndOwnerId(id, ownerId);
         final Item itemFromRepo = itemOpt.orElseThrow(() -> new ItemNotFoundException(id));
 
@@ -65,8 +66,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getOwnerItemById(long itemId, long ownerId) {
-
-
         final Optional<Item> itemOpt = itemRepository.getByIdAndOwnerId(itemId, ownerId);
         final Item item = itemOpt.orElseThrow(() -> new ItemNotFoundException(itemId));
 
@@ -75,8 +74,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getAllOwnerItems(long ownerId) {
-
-
         final List<Item> ownerItems = itemRepository.getOwnerItems(ownerId);
         return ownerItems.stream().map(ItemMapper::toItemDto).collect(toUnmodifiableList());
     }
@@ -92,5 +89,4 @@ public class ItemServiceImpl implements ItemService {
 
         return searchResult.stream().map(ItemMapper::toItemDto).collect(toUnmodifiableList());
     }
-
 }

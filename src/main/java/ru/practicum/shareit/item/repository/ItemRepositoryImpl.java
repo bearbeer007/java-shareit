@@ -12,13 +12,7 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class ItemRepositoryImpl implements ItemRepository {
-    // Все вещи.
-    // Ключ - id вещи.
-    // Значение - вещь.
     private final Map<Long, Item> allItems = new HashMap<>();
-    // Вещи по владельцу.
-    // Ключ - id владельца.
-    // Значение - мапа его вещей.
     private final Map<Long, Map<Long, Item>> itemsByOwner = new HashMap<>();
     private final IdGenerator idGenerator = new IdGenerator(0L);
 
@@ -89,5 +83,4 @@ public class ItemRepositoryImpl implements ItemRepository {
     public boolean contains(long id) {
         return allItems.containsKey(id);
     }
-
 }
