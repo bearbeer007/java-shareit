@@ -79,8 +79,4 @@ public class ItemRepositoryImpl implements ItemRepository {
         return searchResult;
     }
 
-    @Override
-    public boolean contains(long id) {
-        return allItems.containsKey(id);
-    }
 }

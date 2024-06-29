@@ -32,17 +32,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long create(UserCreateDto userDto) {
-        // Проверка, что еще нет пользователя с таким email.
-        checkExistsUserEmail(userDto.getEmail());
-
-        final User user = UserMapper.toUser(userDto);
-        return userRepository.create(user);
-    }
-
-    @Override
     public UserDto createAndGet(UserCreateDto userDto) {
-        final Long id = create(userDto);
+       // final Long id = create(userDto);
+        checkExistsUserEmail(userDto.getEmail());
+        final User user = UserMapper.toUser(userDto);
+        final Long id = userRepository.create(user);
         return getById(id);
     }
 
