@@ -17,5 +17,5 @@ public interface ItemRepository {
     Item update(Item item, long ownerId);
 
     List<Item> search(String text, long userId);
-    
+
 }
