@@ -1,8 +1,6 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.experimental.UtilityClass;
 import org.mapstruct.*;
-import ru.practicum.shareit.common.AbstractMapper;
 import ru.practicum.shareit.user.model.User;
 
 @Mapper(componentModel = "spring")
