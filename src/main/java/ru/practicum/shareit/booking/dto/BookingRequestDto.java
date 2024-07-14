@@ -6,9 +6,9 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.practicum.shareit.constants.Constant;
 
-import javax.validation.constraints.Future;
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Getter
