@@ -1,21 +1,25 @@
 package ru.practicum.shareit.item.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.jackson.Jacksonized;
+import lombok.*;
+import ru.practicum.shareit.booking.dto.ShortBookingItemDto;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
 
-@Builder
-@Jacksonized
-@Data
-@RequiredArgsConstructor
-@AllArgsConstructor
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+
+@Getter
+@Setter
+@ToString
 public class ItemDto {
     private Long id;
+    @NotBlank
     private String name;
+    @NotBlank
     private String description;
-    @JsonProperty("available")
-    private Boolean isAvailable;
+    @NotNull
+    private Boolean available;
+    private ShortBookingItemDto lastBooking;
+    private ShortBookingItemDto nextBooking;
+    private List<CommentDto> comments;
 }

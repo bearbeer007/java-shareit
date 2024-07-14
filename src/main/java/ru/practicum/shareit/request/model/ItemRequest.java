@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.request.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,24 +11,15 @@ import javax.persistence.*;
 @Setter
 @ToString
 @Entity
-@Table(name = "items")
-public class Item {
+@Table(name = "requests")
+public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String name;
-
     private String description;
 
-    @Column(name = "is_available")
-    private Boolean available;
-
-    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
-    private User owner;
-
-    @Column(name = "request_id")
-    private Long requestId;
+    @JoinColumn(name = "requester_id")
+    @ToString.Exclude
+    private User requester;
 }

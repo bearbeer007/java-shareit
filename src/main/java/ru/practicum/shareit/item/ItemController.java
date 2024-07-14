@@ -1,75 +1,56 @@
 package ru.practicum.shareit.item;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemCreateDto;
+import ru.practicum.shareit.constants.Constant;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.service.interfaces.ItemService;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/items")
-@AllArgsConstructor
 @Slf4j
 public class ItemController {
-    private static final String USER_ID_REQUEST_HEADER = "X-Sharer-User-Id";
     private final ItemService itemService;
 
-    // Добавление вещи
     @PostMapping
-    public ItemDto add(@RequestHeader(USER_ID_REQUEST_HEADER) long ownerId, @Valid @RequestBody ItemCreateDto item) {
-        log.info(String.format("POST /items, body = %s, %s = %s", item, USER_ID_REQUEST_HEADER, ownerId));
-        final ItemDto newItem = itemService.createAndGet(item, ownerId);
-        log.info(String.format("Успешно добавлена вещь с id = %s", newItem.getId()));
-
-        return newItem;
+    public ItemDto createItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(Constant.HEADER_USER_ID) Long userId) {
+        log.info("Поступил POST-запрос на добавление item от user c id = {}", userId);
+        return itemService.createItem(itemDto, userId);
     }
 
-    // Обновление информации о вещи ее владельцем
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader(USER_ID_REQUEST_HEADER) long userId,
-                          @Valid @RequestBody ItemDto item,
-                          @PathVariable(name = "itemId") long itemId) {
-        log.info(String.format("PATCH /items/{itemId}, body = %s, {itemId} = %s, %s = %s", item, itemId, USER_ID_REQUEST_HEADER, userId));
-        final ItemDto updatedItem = itemService.update(itemId, item, userId);
-        log.info(String.format("Успешно обновлены данные вещи с id = %s", updatedItem.getId()));
-
-        return updatedItem;
+    public ItemDto updateItem(@PathVariable Long itemId, @RequestBody ItemDto itemDto, @RequestHeader(Constant.HEADER_USER_ID) Long userId) {
+        log.info("Поступил PATCH-запрос от user c id = {} на обновление item с id = {}", userId, itemId);
+        return itemService.updateItem(itemId, itemDto, userId);
     }
 
-    // Получение информации о вещи пользователем
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@RequestHeader(USER_ID_REQUEST_HEADER) long userId,
-                               @PathVariable(name = "itemId") long itemId) {
-        log.info(String.format("GET /items/{itemId}, {itemId} = %s, %s = %s", itemId, USER_ID_REQUEST_HEADER, userId));
-        final ItemDto item = itemService.getById(itemId);
-        log.info(String.format("Успешно получены данные о вещи с id = %s", item.getId()));
-
-        return item;
+    public ItemDto getItemInfo(@RequestHeader(Constant.HEADER_USER_ID) Long userId, @PathVariable Long itemId) {
+        log.info("Поступил GET-запрос на получение item с id = {} от user с id = {}", itemId, userId);
+        return itemService.getItemById(userId, itemId);
     }
 
-    // Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой
     @GetMapping
-    public List<ItemDto> getAllOwnerItems(@RequestHeader(USER_ID_REQUEST_HEADER) long ownerId) {
-        log.info(String.format("GET /items, %s = %s", USER_ID_REQUEST_HEADER, ownerId));
-        final List<ItemDto> ownerItems = itemService.getAllOwnerItems(ownerId);
-        log.info(String.format("Успешно получены вещи (%s штук) пользователя с id = %s", ownerItems.size(), ownerId));
-
-        return ownerItems;
+    public List<ItemDto> getUserItems(@RequestHeader(Constant.HEADER_USER_ID) Long userId) {
+        log.info("Поступил GET-запрос на получение всех user items c userId = {}", userId);
+        return itemService.getUserItems(userId);
     }
 
-    // Поиск вещи потенциальным арендатором.
-    // Пользователь передаёт в строке запроса текст, и система ищет вещи, содержащие этот текст в названии или описании
     @GetMapping("/search")
-    public List<ItemDto> searchItems(@RequestHeader(USER_ID_REQUEST_HEADER) long userId,
-                                     @RequestParam(name = "text") String text) {
-        log.info(String.format("GET /items/search?text=text, text = %s, %s = %s", text, USER_ID_REQUEST_HEADER, userId));
-        final List<ItemDto> searchedItems = itemService.searchItems(text, userId);
-        log.info(String.format("Успешно получены вещи (%s штук) по запросу \"%s\" пользователя с id = %s", searchedItems.size(), text, userId));
+    public List<ItemDto> findItemToRent(@RequestHeader(Constant.HEADER_USER_ID) Long userId, @RequestParam(required = false) String text) {
+        log.info("Поступил GET-запрос от user c id = {} на поиск item", userId);
+        return itemService.searchItemToRent(userId, text);
+    }
 
-        return searchedItems;
+    @PostMapping("{itemId}/comment")
+    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto, @PathVariable Long itemId, @RequestHeader(Constant.HEADER_USER_ID) Long userId) {
+        log.info("Поступил POST-запрос на добавление комментария вещи item c id = {}, пользователем user c id = {}", itemId, userId);
+        return itemService.createComment(commentDto, itemId, userId);
     }
 }
