@@ -9,7 +9,7 @@ import ru.practicum.shareit.booking.service.ItemBookingValidationService;
 import ru.practicum.shareit.booking.service.interfaces.BookingService;
 import ru.practicum.shareit.constants.Constant;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController

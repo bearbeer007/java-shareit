@@ -4,8 +4,8 @@ import lombok.*;
 import ru.practicum.shareit.booking.dto.ShortBookingItemDto;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Getter
