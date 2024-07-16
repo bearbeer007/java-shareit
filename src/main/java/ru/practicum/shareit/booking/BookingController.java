@@ -5,11 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.booking.service.ItemBookingValidationService;
 import ru.practicum.shareit.booking.service.interfaces.BookingService;
 import ru.practicum.shareit.constants.Constant;
 
 import jakarta.validation.Valid;
+import ru.practicum.shareit.item.service.interfaces.ItemService;
+
 import java.util.List;
 
 @RestController
@@ -17,13 +18,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class BookingController {
-    private final ItemBookingValidationService itemBookingValidationService;
     private final BookingService bookingService;
+    private final ItemService itemService;
 
     @PostMapping
     public BookingResponseDto createBooking(@Valid @RequestBody BookingRequestDto bookingDto, @RequestHeader(Constant.HEADER_USER_ID) Long userId) {
         log.info("Поступил POST-запрос на добавление бронирования от user с id = {}", userId);
-        var item = itemBookingValidationService.isItemAvailable(bookingDto.getItemId());
+        var item = itemService.isItemAvailable(bookingDto.getItemId());
         return bookingService.createBookingByUser(bookingDto, userId, item);
     }
 
@@ -48,7 +49,7 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingResponseDto> getBookingsOfAllUserItems(@RequestHeader(Constant.HEADER_USER_ID) Long userId, @RequestParam(defaultValue = "ALL") String state) {
         log.info("Поступил GET-запрос на получение списка бронирований всех вещей user с id = {}", userId);
-        itemBookingValidationService.isUserHaveItems(userId);
+        itemService.isUserHaveItems(userId);
         return bookingService.getAllBookingsOfAllUserItems(userId, state);
     }
 }

@@ -162,4 +162,22 @@ public class ItemServiceImpl implements ItemService {
         }
         return commentMapper.toCommentDto(comment);
     }
+
+    @Override
+    public void isUserHaveItems(Long userId) {
+        var userItems = getUserItems(userId);
+        if (userItems.isEmpty()) {
+            throw new BadRequestException("У данного пользователя нет вещей, userId - " + userId);
+        }
+    }
+
+    @Override
+    public Item isItemAvailable(Long itemId) {
+        var item = itemRepository.findById(itemId).orElseThrow(
+                () -> new NotFoundException("Вещь с таким id: " + itemId + ", отсутствует."));
+        if (!item.getAvailable()) {
+            throw new BadRequestException("Данная вещь не доступна к бронированию, itemId - " + itemId);
+        }
+        return item;
+    }
 }
