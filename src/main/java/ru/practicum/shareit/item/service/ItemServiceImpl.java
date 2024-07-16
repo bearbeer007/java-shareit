@@ -125,7 +125,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> searchItemToRent(Long userId, String text) {
         userService.getUserById(userId);
         if (text == null) {
-            throw new BadRequestException("Параметр для поиска вещи пустой.");
+            return Collections.emptyList();
         }
         if (text.isBlank()) {
             return Collections.emptyList();
