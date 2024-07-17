@@ -17,6 +17,7 @@ import ru.practicum.shareit.booking.service.interfaces.BookingService;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.DAO.UserRepository;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.service.interfaces.UserService;
 
@@ -34,14 +35,14 @@ import java.util.stream.Collectors;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final UserService userService;
+    private final UserRepository userRepository; // заменили UserService на UserRepository
     private final BookingMapper bookingMapper;
     private final UserMapper userMapper;
 
     @Override
     @Transactional
     public BookingResponseDto createBookingByUser(BookingRequestDto bookingRequestDto, Long userId, Item item) {
-        var user = userMapper.toUser(userService.getUserById(userId));
+        var user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         var booking = bookingMapper.toBooking(bookingRequestDto);
         var startDate = booking.getStart();
         var endDate = booking.getEnd();
@@ -51,8 +52,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException("Указано неправильное время начала и конца бронирования");
         }
         if (booking.getItem().getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Владелец не может бронировать собственную вещь, userId = "
-                    + userId + " itemId = " + item.getId());
+            throw new NotFoundException("Владелец не может бронировать собственную вещь, userId = " + userId + " itemId = " + item.getId());
         }
         booking.setStatus(Status.WAITING);
         var createdBooking = bookingRepository.save(booking);
@@ -62,12 +62,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponseDto managingBookingStatus(Long bookingId, Long userId, Boolean approved) {
-        var booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
-            throw new NotFoundException("Бронирование с таким id: " + bookingId + ", отсутствует.");
-        });
+        var booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException("Бронирование с таким id: " + bookingId + ", отсутствует."));
         if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Указанный пользователь c userId = " + userId +
-                    " не является владельцем вещи c itemId = " + booking.getItem().getId());
+            throw new NotFoundException("Указанный пользователь c userId = " + userId + " не является владельцем вещи c itemId = " + booking.getItem().getId());
         }
         if (!booking.getStatus().equals(Status.WAITING)) {
             throw new BadRequestException("Бронирование уже было переведено из статуса WAITING");
@@ -83,22 +80,19 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto getBookingById(Long userId, Long bookingId) {
-        userService.getUserById(userId);
-        var booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
-            throw new NotFoundException("Бронирование с таким id: " + bookingId + ", отсутствует.");
-        });
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        var booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException("Бронирование с таким id: " + bookingId + ", отсутствует."));
         if (booking.getBooker().getId().equals(userId) || booking.getItem().getOwner().getId().equals(userId)) {
             return bookingMapper.toBookingResponseDto(booking);
         } else {
-            throw new NotFoundException("Указанный пользователь c userId = " + userId +
-                    " не является автором бронирования или владельцем вещи c itemId = " + booking.getItem().getId());
+            throw new NotFoundException("Указанный пользователь c userId = " + userId + " не является автором бронирования или владельцем вещи c itemId = " + booking.getItem().getId());
         }
     }
 
     @Override
     public List<BookingResponseDto> getAllBookingsOfUser(Long userId, String state) {
         var validState = State.isStateValid(state);
-        userService.getUserById(userId);
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         switch (validState) {
             case ALL:
                 var allBookings = bookingRepository.findAllBookingsByBookerIdOrderByStartDesc(userId);
