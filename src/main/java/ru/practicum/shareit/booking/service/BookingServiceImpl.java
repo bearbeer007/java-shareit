@@ -19,7 +19,6 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.DAO.UserRepository;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.service.interfaces.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
