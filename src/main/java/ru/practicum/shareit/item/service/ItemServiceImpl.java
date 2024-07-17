@@ -21,13 +21,12 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.interfaces.ItemService;
+import ru.practicum.shareit.user.DAO.UserRepository;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.service.interfaces.UserService;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -40,14 +39,14 @@ public class ItemServiceImpl implements ItemService {
     private final UserMapper userMapper;
     private final CommentMapper commentMapper;
     private final BookingMapper bookingMapper;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final BookingService bookingService;
 
     @Override
     @Transactional
     public ItemDto createItem(ItemDto itemDto, Long userId) {
-        var userDto = userService.getUserById(userId);
-        var user = userMapper.toUser(userDto);
+        var user = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("Пользователь с id: " + userId + " отсутствует."));
         var item = itemMapper.toItem(itemDto);
         item.setOwner(user);
         return itemMapper.toItemDto(itemRepository.save(item));
@@ -56,7 +55,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto updateItem(Long itemId, ItemDto itemDto, Long userId) {
-        userService.getUserById(userId);
+        userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("Пользователь с id: " + userId + " отсутствует."));
         var item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Вещь с таким id: " + itemId + ", отсутствует."));
         if (!item.getOwner().getId().equals(userId)) {
@@ -68,7 +68,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItemById(Long userId, Long itemId) {
-        userService.getUserById(userId);
+        userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("Пользователь с id: " + userId + " отсутствует."));
         var item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Вещь с таким id: " + itemId + ", отсутствует."));
         var itemDto = itemMapper.toItemDto(item);
@@ -85,7 +86,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getUserItems(Long userId) {
-        userService.getUserById(userId);
+        userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("Пользователь с id: " + userId + " отсутствует."));
         var allItemsDto = itemRepository.findAllByOwnerIdOrderById(userId).stream()
                 .map(itemMapper::toItemDto)
                 .collect(Collectors.toList());
@@ -123,7 +125,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItemToRent(Long userId, String text) {
-        userService.getUserById(userId);
+        userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("Пользователь с id: " + userId + " отсутствует."));
         if (text == null) {
             return Collections.emptyList();
         }
@@ -139,7 +142,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long userId) {
-        var user = userMapper.toUser(userService.getUserById(userId));
+        var user = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("Пользователь с id: " + userId + " отсутствует."));
         var comment = commentMapper.toComment(commentDto);
 
         var item = itemRepository.findById(itemId).orElseThrow(
