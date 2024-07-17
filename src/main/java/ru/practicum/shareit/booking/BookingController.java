@@ -49,7 +49,6 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingResponseDto> getBookingsOfAllUserItems(@RequestHeader(Constant.HEADER_USER_ID) Long userId, @RequestParam(defaultValue = "ALL") String state) {
         log.info("Поступил GET-запрос на получение списка бронирований всех вещей user с id = {}", userId);
-        itemService.isUserHaveItems(userId);
         return bookingService.getAllBookingsOfAllUserItems(userId, state);
     }
 }
