@@ -1,47 +1,16 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.experimental.UtilityClass;
-import ru.practicum.shareit.common.AbstractMapper;
+import org.mapstruct.*;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
-@UtilityClass
-public class ItemMapper extends AbstractMapper {
-    public ItemDto toItemDto(Item item) {
-        return ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .isAvailable(item.isAvailable())
-                .build();
-    }
+@Mapper(componentModel = "spring")
+public interface ItemMapper {
 
-    public Item toItem(ItemDto itemDto, User owner) {
-        return Item.builder()
-                .id(itemDto.getId())
-                .name(itemDto.getName())
-                .description(itemDto.getDescription())
-                .isAvailable(itemDto.getIsAvailable())
-                .owner(owner)
-                .build();
-    }
+    ItemDto toItemDto(Item item);
 
-    public Item toItem(ItemCreateDto itemDto, User owner) {
-        return Item.builder()
-                .name(itemDto.getName())
-                .description(itemDto.getDescription())
-                .isAvailable(itemDto.getIsAvailable())
-                .owner(owner)
-                .build();
-    }
+    Item toItem(ItemDto itemDto);
 
-    public Item updateIfDifferent(final Item item, final ItemDto itemWithChanges) {
-        return Item.builder()
-                .id(item.getId())
-                .owner(item.getOwner())
-                .name(getChanged(item.getName(), itemWithChanges.getName()))
-                .description(getChanged(item.getDescription(), itemWithChanges.getDescription()))
-                .isAvailable(getChanged(item.isAvailable(), itemWithChanges.getIsAvailable()))
-                .build();
-    }
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+            nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    void updateItemFromItemDto(ItemDto itemDto, @MappingTarget Item item);
 }

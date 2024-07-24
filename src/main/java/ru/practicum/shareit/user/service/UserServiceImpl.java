@@ -1,92 +1,50 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.DAO.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.exception.EmailAlreadyUsedException;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.interfaces.UserService;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    @Override
-    public UserDto getById(long id) {
-        return UserMapper.toUserDto(getUserById(id));
+    public UserDto addUser(UserDto userDto) {
+        var user = userMapper.toUser(userDto);
+        var createdUser = userRepository.save(user);
+        userDto.setId(createdUser.getId());
+        return userDto;
     }
 
-    @Override
-    public List<UserDto> getAll() {
-        final List<User> users = userRepository.getAll();
-        return users.stream().map(UserMapper::toUserDto).collect(Collectors.toUnmodifiableList());
+    public UserDto updateUser(Long userId, UserDto userDto) {
+        var user = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("Пользователь с таким id: " + userId + ", отсутствует."));
+        userMapper.updateUserFromUserDto(userDto, user);
+        return userMapper.toUserDto(userRepository.save(user));
     }
 
-    @Override
-    public UserDto createAndGet(UserCreateDto userDto) {
-       // final Long id = create(userDto);
-        checkExistsUserEmail(userDto.getEmail());
-        final User user = UserMapper.toUser(userDto);
-        final Long id = userRepository.create(user);
-        return getById(id);
+    public void deleteUserById(Long userId) {
+        getUserById(userId);
+        userRepository.deleteById(userId);
     }
 
-    @Override
-    public UserDto update(long id, UserDto userDto) {
-        // Получение и проверка, что пользователь есть.
-        final User user = getUserById(id);
-
-        // Формируем пользователя с измененными полями.
-        final User changedUser = UserMapper.updateIfDifferent(user, userDto);
-
-        User updatedUser;
-        if (user.equals(changedUser)) {
-            updatedUser = user;
-        } else {
-            // Если все-таки различия есть, то проверяем почту.
-            final String oldEmail = user.getEmail();
-            final String newEmail = changedUser.getEmail();
-
-            if (!oldEmail.equals(newEmail)) {
-                checkExistsUserEmail(newEmail);
-            }
-
-            updatedUser = userRepository.update(changedUser);
-        }
-
-        return UserMapper.toUserDto(updatedUser);
+    public UserDto getUserById(Long userId) {
+        var user = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("Пользователь с таким id: " + userId + ", отсутствует."));
+        return userMapper.toUserDto(user);
     }
 
-    @Override
-    public void delete(long id) {
-        // Потом наверное будут нужны доп. проверки.
-        // Нельзя удалять пользователя, у которого есть вещи. Ну вещи есть, но они не используются.
-        userRepository.delete(id);
-    }
-
-
-    private void checkExistsUserEmail(final String email) {
-        if (userRepository.containsByEmail(email)) {
-            throw new EmailAlreadyUsedException(String.format("Пользователь с email = %s уже существует!", email));
-        }
-    }
-
-    private User getUserById(long id) {
-        final Optional<User> userOpt = userRepository.findById(id);
-
-        if (userOpt.isEmpty()) {
-            throw new UserNotFoundException(id);
-        }
-
-        return userOpt.get();
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 }

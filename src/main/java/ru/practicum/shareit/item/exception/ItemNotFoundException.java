@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.exception;
 
-import ru.practicum.shareit.common.NotFoundException;
+
+import ru.practicum.shareit.exception.NotFoundException;
 
 public class ItemNotFoundException extends NotFoundException {
     private static final String MESSAGE_BASE = "Вещь с id = %s не найдена";
