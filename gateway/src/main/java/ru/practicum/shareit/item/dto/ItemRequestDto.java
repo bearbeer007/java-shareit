@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemRequestDto {
-    private Long id;
+    Long id;
     @NotBlank
     private String name;
     @NotBlank
